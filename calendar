@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teams Meeting Scheduler</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* General Reset and Teams-Inspired Look */
+        :root {
+            --teams-blue: #464eb7; /* Teams primary color */
+            --teams-green: #0078d4; /* Teams button color / Microsoft Blue */
+            --light-bg: #f5f5f5;
+            --card-bg: #ffffff;
+            --text-color: #333;
+            --border-color: #ccc;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light-bg);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* Card Styling */
+        .card {
+            max-width: 450px;
+            width: 90%;
+            background-color: var(--card-bg);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        /* Header and Logo */
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--teams-blue);
+            padding-bottom: 15px;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+
+        .teams-logo-icon {
+            /* Pure CSS representation of the Teams logo */
+            width: 32px;
+            height: 32px;
+            background-color: var(--teams-blue);
+            border-radius: 8px;
+            position: relative;
+            margin-right: 10px;
+        }
+        .teams-logo-icon::before {
+            content: 'T';
+            color: white;
+            font-size: 24px;
+            font-weight: 700;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        h2 {
+            margin: 0;
+            color: var(--teams-blue);
+            font-weight: 600;
+        }
+
+        /* Form Elements */
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--teams-blue);
+        }
+
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            box-sizing: border-box; /* Include padding in width */
+            font-size: 15px;
+            transition: border-color 0.2s;
+            background-color: #fafafa;
+        }
+
+        input[type="text"]:focus,
+        select:focus {
+            border-color: var(--teams-green);
+            outline: none;
+            box-shadow: 0 0 5px rgba(0, 120, 212, 0.2);
+        }
+
+        /* Button Styling */
+        button[type="submit"] {
+            width: 100%;
+            padding: 15px;
+            background-color: var(--teams-green); /* Microsoft Blue */
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #005a9e; /* Darker shade on hover */
+        }
+
+        button[type="submit"]:active {
+            transform: scale(0.99);
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="header">
+            <div class="logo-container">
+                <div class="teams-logo-icon"></div>
+                <h2>Teams Meeting Scheduler</h2>
+            </div>
+        </div>
+        
+        <form id="meetingForm">
+            <div>
+                <label for="startDateTime">Meeting Start Date & Time:</label>
+                <input type="text" id="startDateTime" class="flatpickr" placeholder="Select start date and time" required>
+            </div>
+            
+            <div>
+                <label for="duration">Meeting Duration:</label>
+                <select id="duration">
+                    <option value="30">30 minutes</option>
+                    <option value="60" selected>1 hour</option>
+                    <option value="90">1 hour 30 minutes</option>
+                    <option value="120">2 hours</option>
+                </select>
+            </div>
+            
+            <div>
+                <label for="subject">Subject:</label>
+                <input type="text" id="subject" placeholder="e.g., Project Sync-up" required>
+            </div>
+            
+            <button type="submit">
+                Create Teams Meeting Invitation
+            </button>
+        </form>
+    </div>
+
+    <script>
+        // Flatpickr initialization
+        flatpickr("#startDateTime", {
+            enableTime: true,
+            dateFormat: "Y-m-d H:i",
+            time_24hr: true,
+            defaultHour: 9,
+            minuteIncrement: 15
+        });
+
+        // Form Submission Logic
+        document.getElementById('meetingForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const startDateTime = document.getElementById('startDateTime').value;
+            const duration = document.getElementById('duration').value;
+            const subject = document.getElementById('subject').value;
+            
+            const startDate = new Date(startDateTime);
+            // Calculate end time
+            const endDateTime = new Date(startDate.getTime() + (duration * 60 * 1000));
+            
+            // Format dates for the Teams URI: YYYYMMDDTHHMM
+            const formatTeamsDate = (date) => {
+                // Pad function to ensure two digits
+                const pad = (num) => String(num).padStart(2, '0');
+                
+                return date.getFullYear() + 
+                       pad(date.getMonth() + 1) + 
+                       pad(date.getDate()) + 
+                       'T' + 
+                       pad(date.getHours()) + 
+                       pad(date.getMinutes());
+            };
+
+            const formattedStart = formatTeamsDate(startDate);
+            const formattedEnd = formatTeamsDate(endDateTime);
+            
+            // Create the ms-teams: URI
+            const teamsUri = `https://teams.microsoft.com/l/meeting/new?subject=${encodeURIComponent(subject)}&startdatetime=${formattedStart}&enddatetime=${formattedEnd}`;
+            
+            window.open(teamsUri, '_blank');
+        });
+    </script>
+</body>
+</html>
